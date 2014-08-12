@@ -30,7 +30,7 @@ def secret(root):
 
         Returns: Random secret key in string.
     """
-    SECRET = os.path.join(root, 'SECRET')
+    SECRET = os.path.join(root, '.secret')
     try:
         key = open(SECRET, 'r').read().strip()
     except IOError:
