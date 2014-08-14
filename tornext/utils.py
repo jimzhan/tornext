@@ -20,20 +20,17 @@ import sys
 import site
 
 
-__all__ = ('add_libs', 'here')
+__all__ = ('add_libs',)
 
 
-here = lambda base, *dirs: os.path.join(os.path.dirname(os.path.abspath(base)), *dirs)
-
-
-def add_libs(path):
+def add_libs(basedir):
     """Add libraries into site path from the given path.
 
     Args:
-        path: Thirdparty libraries base path.
+        basedir: Thirdparty libraries base path.
     """
-    if os.path.exists(path):
-        for directory in os.listdir(path):
-            lib = os.path.join(path, directory)
+    if os.path.exists(basedir):
+        for directory in os.listdir(basedir):
+            lib = os.path.join(basedir, directory)
             if os.path.isdir(lib) and (lib not in sys.path):
                 site.addsitedir(lib)
