@@ -16,10 +16,14 @@
 # limitations under the License.
 
 import os
+import sys
 import site
 
 
-__all__ = ('add_libs',)
+__all__ = ('add_libs', 'here')
+
+
+here = lambda base, *dirs: os.path.join(os.path.dirname(os.path.abspath(base)), *dirs)
 
 
 def add_libs(path):
@@ -31,5 +35,5 @@ def add_libs(path):
     if os.path.exists(path):
         for directory in os.listdir(path):
             lib = os.path.join(path, directory)
-            if os.path.isdir(lib):
+            if os.path.isdir(lib) and (lib not in sys.path):
                 site.addsitedir(lib)
