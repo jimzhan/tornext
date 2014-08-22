@@ -19,3 +19,14 @@
 
 """
 
+
+def auth():
+    """Decorator to check if the incoming HTTP request is authenticated.
+    """
+    pass
+
+
+def perm(scope):
+    """Decorator to check if the resource is accessible for the request.
+    """
+    pass

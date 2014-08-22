@@ -22,6 +22,18 @@ import random
 import string
 
 
+__all__ = ('generate_cookie_secret', 'secret',)
+
+
+def generate_cookie_secret():
+    """Generate a random secret key for encrypting cookie.
+    """
+    return ''.join([random.SystemRandom().choice("{}{}{}".format(
+                    string.ascii_letters,
+                    string.digits,
+                    string.punctuation)) for i in range(50)])
+
+
 def secret(root):
     """Create a random secret key for cookie (save it to the file).
 
@@ -34,10 +46,7 @@ def secret(root):
     try:
         key = open(SECRET, 'r').read().strip()
     except IOError:
-        key = ''.join([random.SystemRandom().choice("{}{}{}".format(
-            string.ascii_letters,
-            string.digits,
-            string.punctuation)) for i in range(50)])
+        key = generate_cookie_secret()
         with open(SECRET, 'w') as secret:
             secret.write(key)
     return key

@@ -15,4 +15,12 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
+import os
+import time
+
+from hashlib import sha1
+
+
+SessionId = lambda: sha1('%s%s' % (os.urandom(16), time.time())).hexdigest()
+
 
