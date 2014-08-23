@@ -1,180 +1,102 @@
 #!/usr/bin/env python
 # -*- coding: utf-8 -*-
-import math
-import sys
-from bisect import bisect
+#
+# Copyright © 2014 Jim Zhan <jim.zhan@me.com>
+#
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+#
+#   http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
 
 """
-    ref: https://github.com/Doist/hash_ring
+ consistent hashing for nosql client
+ based on ezmobius client (redis-rb)
+ and see this article http://amix.dk/blog/viewEntry/19367
 
-    hash_ring
-    ~~~~~~~~~~~~~~
-    Implements consistent hashing that can be used when
-    the number of server nodes can increase or decrease (like in memcached).
-
-    Consistent hashing is a scheme that provides a hash table functionality
-    in a way that the adding or removing of one slot
-    does not significantly change the mapping of keys to slots.
-
-    More information about consistent hashing can be read in these articles:
-
-        "Web Caching with Consistent Hashing":
-            http://www8.org/w8-papers/2a-webserver/caching/paper2.html
-
-        "Consistent hashing and random trees:
-        Distributed caching protocols for relieving hot spots on the World Wide Web (1997)":
-            http://citeseerx.ist.psu.edu/legacymapper?did=38148
-
-
-    Example of usage::
-
-        memcache_servers = ['192.168.0.246:11212',
-                            '192.168.0.247:11212',
-                            '192.168.0.249:11212']
-
-        ring = HashRing(memcache_servers)
-        server = ring.get_node('my_key')
-
-    :copyright: 2008 by Amir Salihefendic.
-    :license: BSD
+ref: https://github.com/Doist/hash_ring
 """
+from __future__ import absolute_import
 
-if sys.version_info >= (2, 5):
-    import hashlib
-    md5_constructor = hashlib.md5
-else:
-    import md5
-    md5_constructor = md5.new
+import zlib
+import bisect
 
-
-if sys.version_info[0] < 3:
-    # sounds weird but I need to set the encoding for python3.3
-    bytes = lambda x, y: str(x)
-    xrange = xrange
-else:
-    bytes  = bytes
-    xrange = range
-
+from tornext import compat
 
 
 class Sharding(object):
+    """Consistent hash for nosql API"""
+    def __init__(self, nodes=[], replicas=128):
+        """Manages a hash ring.
 
-    def __init__(self, nodes=None, weights=None):
-        """`nodes` is a list of objects that have a proper __str__ representation.
-        `weights` is dictionary that sets weights to the nodes.  The default
-        weight is that all nodes are equal.
+        `nodes` is a list of objects that have a proper __str__ representation.
+        `replicas` indicates how many virtual points should be used pr. node,
+        replicas are required to improve the distribution.
         """
-        self.ring = dict()
-        self._sorted_keys = []
+        self.nodes = set()
+        self.replicas = replicas
+        self.ring = {}
+        self.sorted_keys = []
 
-        self.nodes = nodes
+        for n in nodes:
+            self.add_node(n)
 
-        if not weights:
-            weights = {}
-        self.weights = weights
-
-        self._generate_circle()
-
-    def _generate_circle(self):
-        """Generates the circle.
+    def add_node(self, node):
+        """Adds a `node` to the hash ring (including a number of replicas).
         """
-        total_weight = 0
-        for node in self.nodes:
-            total_weight += self.weights.get(node, 1)
+        self.nodes.add(node)
+        for x in compat.xrange(self.replicas):
+            crckey = zlib.crc32(compat.Byte("%s:%d" % (node, x)))
+            self.ring[crckey] = node
+            self.sorted_keys.append(crckey)
 
-        for node in self.nodes:
-            weight = 1
+        self.sorted_keys.sort()
 
-            if node in self.weights:
-                weight = self.weights.get(node)
+    def remove_node(self, node):
+        """Removes `node` from the hash ring and its replicas.
+        """
+        self.nodes.remove(node)
+        for x in compat.xrange(self.replicas):
+            crckey = zlib.crc32(compat.Byte("%s:%d" % (node, x)))
+            self.ring.remove(crckey)
+            self.sorted_keys.remove(crckey)
 
-            factor = math.floor((40*len(self.nodes)*weight) / total_weight);
-
-            for j in range(0, int(factor)):
-                b_key = self._hash_digest( '%s-%s' % (node, j) )
-
-                for i in range(0, 3):
-                    key = self._hash_val(b_key, lambda x: x+i*4)
-                    self.ring[key] = node
-                    self._sorted_keys.append(key)
-
-        self._sorted_keys.sort()
-
-    def get_node(self, string_key):
+    def get_node(self, key):
         """Given a string key a corresponding node in the hash ring is returned.
 
         If the hash ring is empty, `None` is returned.
         """
-        pos = self.get_node_pos(string_key)
-        if pos is None:
-            return None
-        return self.ring[ self._sorted_keys[pos] ]
+        n, i = self.get_node_pos(key)
+        return n
 
-    def get_node_pos(self, string_key):
+    def get_node_pos(self, key):
         """Given a string key a corresponding node in the hash ring is returned
         along with it's position in the ring.
 
         If the hash ring is empty, (`None`, `None`) is returned.
         """
-        if not self.ring:
-            return None
+        if len(self.ring) == 0:
+            return [None, None]
+        crc = zlib.crc32(compat.Byte(key))
+        idx = bisect.bisect(self.sorted_keys, crc)
+        idx = min(idx, (self.replicas * len(self.nodes)) - 1)
+        # prevents out of range index
+        return [self.ring[self.sorted_keys[idx]], idx]
 
-        key = self.gen_key(string_key)
-
-        nodes = self._sorted_keys
-        pos = bisect(nodes, key)
-
-        if pos == len(nodes):
-            return 0
-        else:
-            return pos
-
-    def iterate_nodes(self, string_key, distinct=True):
+    def iter_nodes(self, key):
         """Given a string key it returns the nodes as a generator that can hold the key.
-
-        The generator iterates one time through the ring
-        starting at the correct position.
-
-        if `distinct` is set, then the nodes returned will be unique,
-        i.e. no virtual copies will be returned.
         """
-        if not self.ring:
+        if len(self.ring) == 0:
             yield None, None
+        node, pos = self.get_node_pos(key)
+        for k in self.sorted_keys[pos:]:
+            yield k, self.ring[k]
 
-        returned_values = set()
-        def distinct_filter(value):
-            if str(value) not in returned_values:
-                returned_values.add(str(value))
-                return value
-
-        pos = self.get_node_pos(string_key)
-        for key in self._sorted_keys[pos:]:
-            val = distinct_filter(self.ring[key])
-            if val:
-                yield val
-
-        for i, key in enumerate(self._sorted_keys):
-            if i < pos:
-                val = distinct_filter(self.ring[key])
-                if val:
-                    yield val
-
-    def gen_key(self, key):
-        """Given a string key it returns a long value,
-        this long value represents a place on the hash ring.
-
-        md5 is currently used because it mixes well.
-        """
-        b_key = self._hash_digest(key)
-        return self._hash_val(b_key, lambda x: x)
-
-    def _hash_val(self, b_key, entry_fn):
-        return (( b_key[entry_fn(3)] << 24)
-                |(b_key[entry_fn(2)] << 16)
-                |(b_key[entry_fn(1)] << 8)
-                | b_key[entry_fn(0)] )
-
-    def _hash_digest(self, key):
-        m = md5_constructor()
-        m.update(bytes(key, 'utf-8'))
-        return list(map(ord, str(m.digest())))
+    def __call__(self, key):
+        return self.get_node(key)

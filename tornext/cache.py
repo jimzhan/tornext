@@ -16,5 +16,5 @@
 # limitations under the License.
 
 """
-Cache decorators.
+Redis-based cache helpers.
 """
