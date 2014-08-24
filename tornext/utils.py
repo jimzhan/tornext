@@ -19,8 +19,10 @@ from __future__ import absolute_import
 import os
 import sys
 import site
+import string
 
 from hashlib import md5
+from urllib import urlencode
 from tornado import locale
 
 
@@ -87,3 +89,34 @@ def get_cache_key(request, prefix=None):
         context.update(prefix)
     return context.hexdigest()
 
+
+def get_hash_from_dict(dictionary, ignore_none=False):
+    """Generate md5-based hash from the given dictionary.
+
+    Args:
+        dictionary (dict): dict to be hashed.
+        ignore_none (bool): whether to ignore the items with None values.
+
+    Returns:
+        md5-based hash string.
+    """
+    if ignore_none:
+        dictionary = dict([(k, v) for k, v in dictionary.items() if v is not None])
+    return md5(urlencode(dictionary)).hexdigest()
+
+
+def Template(template, **context):
+    """
+    Simple shortcut to `string.Template`, using safe_substitute method.
+
+    Usage:
+        Template('Hello ${name}', name='someone')  => 'Hello someone'
+
+    Args:
+        template (str): raw string template follows `string.Template` rules.
+        context (dict): context of the string template.
+
+    Returns:
+        Substituted string by merging raw string template and its context.
+    """
+    return string.Template(template).safe_substitute(**context)
