@@ -18,3 +18,40 @@
 """
 Redis-based cache helpers.
 """
+from __future__ import absolute_import
+
+import logging
+
+from tornado.options import options
+from tornext import utils
+
+
+logger = logging.getLogger(__name__)
+
+
+class AbstractCache(object):
+
+    def clear(self):
+        raise NotImplementedError
+
+
+    def delete(self, key):
+        raise NotImplementedError
+
+
+    def get(self, key):
+        raise NotImplementedError
+
+
+    def set(self, key, value, timeout=None, **options):
+        raise NotImplementedError
+
+
+
+class MemoryCache(AbstractCache):
+    pass
+
+
+class RedisCache(AbstractCache):
+    pass
+

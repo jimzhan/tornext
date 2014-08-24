@@ -14,13 +14,17 @@
 # WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 # See the License for the specific language governing permissions and
 # limitations under the License.
+from __future__ import absolute_import
 
 import os
 import sys
 import site
 
+from hashlib import md5
+from tornado import locale
 
-__all__ = ('add_libs',)
+
+__all__ = ('add_libs', 'get_browser_locale', 'get_cache_key')
 
 
 def add_libs(basedir):
@@ -34,3 +38,52 @@ def add_libs(basedir):
             lib = os.path.join(basedir, directory)
             if os.path.isdir(lib) and (lib not in sys.path):
                 site.addsitedir(lib)
+
+
+def get_browser_locale(request, default="en_US"):
+    """Determines the user's locale from ``Accept-Language`` header.
+
+    Taken from `tornado.web.RequestHandler`#`get_browser_locale`.
+    See http://www.w3.org/Protocols/rfc2616/rfc2616-sec14.html#sec14.4
+
+    Args:
+        request: `tornado.httputils.HTTPServerRequest` instance.
+        default: default locale code (en_US).
+
+    Returns: Language code.
+    """
+    if "Accept-Language" in request.headers:
+        languages = request.headers["Accept-Language"].split(",")
+        locales = []
+        for language in languages:
+            parts = language.strip().split(";")
+            if len(parts) > 1 and parts[1].startswith("q="):
+                try:
+                    score = float(parts[1][2:])
+                except (ValueError, TypeError):
+                    score = 0.0
+            else:
+                score = 1.0
+            locales.append((parts[0], score))
+        if locales:
+            locales.sort(key=lambda pair: pair[1], reverse=True)
+            codes = [l[0] for l in locales]
+            return locale.get(*codes).code
+    return locale.get(default).code
+
+
+def get_cache_key(request, prefix=None):
+    """Generate distributed cache key from the incoming request.
+
+    Key components by order:
+        full request url
+        user's locale (default: en-us)
+        prefix: default is None, prepare for user identity based caching.
+    """
+    context = md5()
+    context.update(request.full_url())
+    context.update(get_browser_locale(request))
+    if prefix:
+        context.update(prefix)
+    return context.hexdigest()
+
