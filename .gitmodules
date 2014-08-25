@@ -1,3 +1,0 @@
-[submodule "lib/redis-py"]
-	path = lib/redis-py
-	url = https://github.com/andymccurdy/redis-py
