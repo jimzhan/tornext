@@ -26,7 +26,7 @@ from urllib import urlencode
 from tornado import locale
 
 
-__all__ = ('add_libs', 'get_browser_locale', 'get_cache_key')
+__all__ = ('add_libs', 'decorate', 'get_browser_locale', 'get_cache_key')
 
 
 def add_libs(basedir):
@@ -40,6 +40,20 @@ def add_libs(basedir):
             lib = os.path.join(basedir, directory)
             if os.path.isdir(lib) and (lib not in sys.path):
                 site.addsitedir(lib)
+
+
+def decorate(wrapper):
+    """Decorator helper with argument supports.
+
+    Example:
+        @decorate
+        def my_decorator(func, *deco_args, **deco_kwargs):
+            def wrapper(*func_args, **func_kwargs):
+                print "from decorator:", deco_args, deco_kwargs
+                func(*func_args, **func_kwargs)
+            return wrapper
+    """
+    return lambda *args, **kwargs: lambda func: wrapper(func, *args, **kwargs)
 
 
 def get_browser_locale(request, default="en_US"):
@@ -83,10 +97,9 @@ def get_cache_key(request, prefix=None):
         prefix: default is None, prepare for user identity based caching.
     """
     context = md5()
+    if prefix: context.update(prefix)
     context.update(request.full_url())
     context.update(get_browser_locale(request))
-    if prefix:
-        context.update(prefix)
     return context.hexdigest()
 
 

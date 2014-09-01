@@ -49,5 +49,7 @@ def cache(func, timeout=3600):
     def wrapper(self, *args, **kwargs):
         cache_key = utils.get_cache_key(self.request)
         logger.info('** Decorating: %s Timeout: %d' % (cache_key, timeout))
+        # cachding the calculated response here
+
         return func(self, *args, **kwargs)
     return wrapper

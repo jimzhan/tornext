@@ -20,6 +20,8 @@ Redis-based cache helpers.
 """
 from __future__ import absolute_import
 
+import hmac
+import hashlib
 import logging
 
 from redis.client import Redis
@@ -27,6 +29,7 @@ from redis.client import Redis
 #from tornado.options import options
 
 #from tornext import utils
+from tornext import http
 from tornext.sharding import Sharding
 
 
@@ -34,25 +37,6 @@ logger = logging.getLogger(__name__)
 
 
 class AbstractCache(object):
-
-    def clear(self):
-        raise NotImplementedError
-
-
-    def delete(self, key):
-        raise NotImplementedError
-
-
-    def get(self, key):
-        raise NotImplementedError
-
-
-    def set(self, key, value, timeout=None, **options):
-        raise NotImplementedError
-
-
-
-class MemoryCache(AbstractCache):
     pass
 
 
@@ -97,4 +81,80 @@ class RedisCache(AbstractCache):
         Returns:
             instance of `redis.client.Redis` for accessing single Redis node.
         """
-        return self.dispatcher.get_node(key)
+        url = self.dispatcher.get_node(key)
+        print '[Node] %s' % url
+        return self.mapping.get(url)
+
+
+    def get(self, key):
+        """Get cached item via the md5 key.
+
+        Fetch the corresponding sharding node for consequent requests.
+
+        Args:
+            key: md5-based cache key.
+
+        Returns: value for `key` at sharding node, or None if the key doesn't exist.
+        """
+        node = self.get_node(key)
+        return node and node.get(key) or None
+
+
+    def set(self, key, value, timeout=None):
+        """Set the value for key.
+
+        Args:
+            key: md5-based cache key.
+            value: value to be set.
+            timeout: expire the value in a given period (seconds).
+        """
+        node = self.get_node(key)
+        if timeout and isinstance(timeout, int):
+            node.set(key, value, timeout)
+        else:
+            node.set(key, value)
+
+
+    def delete(self, *keys):
+        """Delete cached items with given keys.
+
+        Args:
+            keys: single cache key or list of cache keys.
+        """
+        if isinstance(keys, (tuple, list)):
+            for key in keys:
+                node = self.get_node(key)
+                node.delete(key)
+        else:
+            node = self.get_node(key)
+            node.delete(key)
+
+
+
+class CacheMixin(object):
+    """Cache support for `tornado.web.RequestHandler`.
+    """
+
+    @property
+    def cache(self):
+        raise NotImplementedError
+
+
+    def get_cache_key(self, prefix=None):
+        """Generate distributed cache key from the incoming request.
+
+        Key components by order:
+            full request url
+            user's locale (default: en-us)
+            prefix: default is None, prepare for user identity based caching.
+        """
+
+        context = md5()
+        if prefix: context.update(prefix)
+        context.update(self.request.full_url())
+        context.update(self.get_browser_locale(request))
+        return context.hexdigest()
+
+
+    def prepare(self):
+        super(CacheMixin, self).prepare()
