@@ -1,9 +1,7 @@
 #!/usr/bin/env python
 # -*- coding: utf-8 -*-
-import os.path
+from tornext.utils import here
 
-
-root = os.path.abspath(os.path.dirname(__file__))
 
 # general settings #
 debug = True
@@ -13,10 +11,10 @@ debug = True
 cookie_secret = '${cookie_secret}'
 
 # templates settings
-template_path = os.path.join(root, 'templates')
+template_path = here('templates')
 
 # static files settings #
-static_path = os.path.join(root, 'assets')
+static_path = here('assets')
 
 
 # Cache Settings #

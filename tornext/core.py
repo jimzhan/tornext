@@ -19,40 +19,17 @@ from __future__ import absolute_import
 
 """
 import os
-import sys
-import yaml
 import inspect
 import logging
 
-try:
-    from yaml import CLoader as Loader, CDumper as Dumper
-except ImportError:
-    from yaml import Loader, Dumper
-
 from tornado import web
 from tornado import ioloop
-from tornado.util import exec_in
 from tornado.options import define, options
 
 from tornext import debug
-from tornext import settings
 
 
 logger = logging.getLogger(__name__)
-
-
-def load_user_settings(config):
-    """Fetch user's settings & merge with defaults (`tornext.settings`).
-
-    Args:
-        config: user's settings file path (YAML).
-
-    Returns: `dict` merged with `tornado.settings` & user's YAML.
-    """
-    if os.path.exists(config) and os.path.isfile(config):
-        user_settings = yaml.load(file(config, 'r'), Loader=Loader)
-        settings.update(user_settings.get('tornado', {}))
-    return settings
 
 
 def configure(config):
@@ -70,11 +47,15 @@ def configure(config):
 class Application(web.Application):
     """Extension for `tornado.web.Application` with config support.
     """
-    def __init__(self, handlers, default_host="", transforms=None, config='app.yml'):
+    def __init__(self, handlers, config='settings.py', **kwargs):
+        options.config = config
+        default_host = kwargs.get('default_host', '')
+        transform    = kwargs.get('transform', None)
+        settings     = options.group_dict('application')
         super(Application, self).__init__(handlers,
                                         default_host,
                                         transforms,
-                                        **load_user_settings(config))
+                                        **settings)
 
 
     def start(self, port, **settings):

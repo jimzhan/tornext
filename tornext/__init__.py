@@ -23,8 +23,10 @@ for config file, as the options in config file will not be
 available until they are defined via `tornado.options.define`
 beforehand.
 """
-from tornado.options import define, options, parse_config_file
 from tornado.util import ObjectDict
+from tornado.options import (define,
+                            options,
+                            parse_config_file)
 
 
 ########################################
@@ -39,7 +41,7 @@ define('default_handler_args',  group='application')
 define('ui_modules', group='application')
 define('ui_methods', group='application')
 # outside the application scope
-define('root',   type=str, help='application root dir')
+define('basedir',type=str, help='application base dir')
 define('port',   default=8000,  help="run on the given port")
 define('config', callback=lambda path: parse_config_file(path, final=False))
 #################
