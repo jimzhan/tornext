@@ -22,5 +22,3 @@ from hashlib import sha1
 
 
 SessionId = lambda: sha1('%s%s' % (os.urandom(16), time.time())).hexdigest()
-
-

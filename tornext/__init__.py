@@ -14,17 +14,18 @@
 # WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 # See the License for the specific language governing permissions and
 # limitations under the License.
-
 from __future__ import absolute_import
 
 
-class Object:
-    """Plain Object class with auto getter/setter support.
-    """
-    def __init__(self, *args, **kwargs):
-        self.__dict__.update(**kwargs)
-
-
-    def __iter__(self):
-        for key, value in vars(self).items():
-            yield key, value
+######################################################################
+#   Default Tornado Settings
+######################################################################
+settings = {}
+# gerneral settings
+settings['debug']                   = True
+settings['autoreload']              = settings['debug']
+# auth settings
+settings['login_url']               = '/login'
+settings['xsrf_cookies']            = True
+# static resources settings
+settings['static_url_prefix']       = '/assets/'

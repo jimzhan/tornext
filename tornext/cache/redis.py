@@ -14,31 +14,19 @@
 # WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 # See the License for the specific language governing permissions and
 # limitations under the License.
-
-"""
-Redis-based cache helpers.
-"""
 from __future__ import absolute_import
+"""
 
-import hmac
-import hashlib
+"""
 import logging
 
 from redis.client import Redis
 
-#from tornado.options import options
-
-#from tornext import utils
-from tornext import http
 from tornext.sharding import Sharding
+from tornext.cache import AbstractCache
 
 
 logger = logging.getLogger(__name__)
-
-
-class AbstractCache(object):
-    pass
-
 
 
 class RedisCache(AbstractCache):
@@ -58,18 +46,18 @@ class RedisCache(AbstractCache):
     }
 
     """
-    def __init__(self, nodes, **settings):
+    def __init__(self, urls, **settings):
         """
         Args:
-            nodes: list of connection urls for `redis.client.StrictRedis#from_url`.
+            urls: list of connection urls for `redis.client.StrictRedis#from_url`.
             settings: additional settings for redis client.
 
         Attributes:
             mapping (dict): maintain the connection url & corresponding Redis client mapping.
-            dispather: `tornext.sharding.Sharding` instance for dispatching requests.
+            sharding: `tornext.sharding.Sharding` instance for dispatching requests.
         """
-        self.dispatcher = Sharding(nodes)
-        self.mapping = dict([(url, Redis.from_url(url)) for url in nodes])
+        self.sharding = Sharding(urls)
+        self.mapping  = dict([(url, Redis.from_url(url)) for url in urls])
 
 
     def get_node(self, key):
@@ -81,9 +69,20 @@ class RedisCache(AbstractCache):
         Returns:
             instance of `redis.client.Redis` for accessing single Redis node.
         """
-        url = self.dispatcher.get_node(key)
-        print '[Node] %s' % url
+        url = self.sharding.get_node(key)
         return self.mapping.get(url)
+
+
+    def exists(self, key):
+        """Check if `key` exists.
+
+        Args:
+            key: hex-digested cache key.
+
+        Returns: boolean value indicating if corresponding `key` exists.
+        """
+        node = self.get_node(key)
+        return node and node.exists(key) or False
 
 
     def get(self, key):
@@ -109,10 +108,7 @@ class RedisCache(AbstractCache):
             timeout: expire the value in a given period (seconds).
         """
         node = self.get_node(key)
-        if timeout and isinstance(timeout, int):
-            node.set(key, value, timeout)
-        else:
-            node.set(key, value)
+        node.set(key, value, isinstance(timeout, int) and timeout or None)
 
 
     def delete(self, *keys):
@@ -130,31 +126,3 @@ class RedisCache(AbstractCache):
             node.delete(key)
 
 
-
-class CacheMixin(object):
-    """Cache support for `tornado.web.RequestHandler`.
-    """
-
-    @property
-    def cache(self):
-        raise NotImplementedError
-
-
-    def get_cache_key(self, prefix=None):
-        """Generate distributed cache key from the incoming request.
-
-        Key components by order:
-            full request url
-            user's locale (default: en-us)
-            prefix: default is None, prepare for user identity based caching.
-        """
-
-        context = md5()
-        if prefix: context.update(prefix)
-        context.update(self.request.full_url())
-        context.update(self.get_browser_locale(request))
-        return context.hexdigest()
-
-
-    def prepare(self):
-        super(CacheMixin, self).prepare()
