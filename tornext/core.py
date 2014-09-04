@@ -31,6 +31,7 @@ except ImportError:
 
 from tornado import web
 from tornado import ioloop
+from tornado.util import exec_in
 from tornado.options import define, options
 
 from tornext import debug
@@ -52,6 +53,18 @@ def load_user_settings(config):
         user_settings = yaml.load(file(config, 'r'), Loader=Loader)
         settings.update(user_settings.get('tornado', {}))
     return settings
+
+
+def configure(config):
+    """Fetch user's settings & merge with defaults (`tornext.settings`).
+
+    Args:
+        config: Python-based user's settings file path.
+    """
+
+    if os.path.exists(config) and os.path.isfile(config):
+        pass
+
 
 
 class Application(web.Application):

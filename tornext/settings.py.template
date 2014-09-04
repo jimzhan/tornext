@@ -1,0 +1,28 @@
+#!/usr/bin/env python
+# -*- coding: utf-8 -*-
+import os.path
+
+
+root = os.path.abspath(os.path.dirname(__file__))
+
+# general settings #
+debug = True
+#ui_modules = apps.uimodules
+
+# auth settings #
+cookie_secret = '${cookie_secret}'
+
+# templates settings
+template_path = os.path.join(root, 'templates')
+
+# static files settings #
+static_path = os.path.join(root, 'assets')
+
+
+# Cache Settings #
+cache = {}
+cache['urls'] = ('redis://127.0.0.1:6379',)
+
+# Database Settings #
+database = {}
+database['urls'] = ('sqlite:///tmp/dev.sqlite',)

@@ -14,7 +14,7 @@
 # WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 # See the License for the specific language governing permissions and
 # limitations under the License.
-from __future__ import absolute_import
+from __future__ import absolute_import, with_statement
 
 import os
 import sys
@@ -38,4 +38,16 @@ def add_libs(basedir):
                 site.addsitedir(lib)
 
 
-Template = lambda template, **context: string.Template(template).safe_substitute(**context)
+def Template(path, **context):
+    """Simple file-based template shortcut.
+
+    Using built-in `string.Template` with `safe_substitute` method.
+
+    Args:
+        path: template file path.
+
+    Returns: substituted file content.
+    """
+    with open(path, 'r') as fileobj:
+        template = string.Template(fileobj.read())
+    return template.safe_substitute(**context)
