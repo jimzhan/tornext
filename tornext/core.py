@@ -18,56 +18,33 @@ from __future__ import absolute_import
 """
 
 """
-import os
-import inspect
 import logging
 
 from tornado import web
 from tornado import ioloop
-from tornado.options import define, options
-
-from tornext import debug
+from tornado.options import options
 
 
 logger = logging.getLogger(__name__)
-
-
-def configure(config):
-    """Fetch user's settings & merge with defaults (`tornext.settings`).
-
-    Args:
-        config: Python-based user's settings file path.
-    """
-
-    if os.path.exists(config) and os.path.isfile(config):
-        pass
 
 
 
 class Application(web.Application):
     """Extension for `tornado.web.Application` with config support.
     """
-    def __init__(self, handlers, config='settings.py', **kwargs):
+    def __init__(self, handlers, config='settings.py'):
+        # trigger parse_config_file
         options.config = config
-        default_host = kwargs.get('default_host', '')
-        transform    = kwargs.get('transform', None)
-        settings     = options.group_dict('application')
-        super(Application, self).__init__(handlers,
-                                        default_host,
-                                        transforms,
-                                        **settings)
+        settings = options.group_dict('app')
+        super(Application, self).__init__(handlers,**settings)
 
 
-    def start(self, port, **settings):
+    def start(self, port, address='127.0.0.1', **settings):
         """Starts an HTTP server for this application on the given port.
         """
-        if not hasattr(options, 'basedir'):
-            traceback = debug.traceback(inspect.currentframe())
-            basedir = os.path.abspath(os.path.dirname(traceback.filename))
-            define('basedir', default=basedir, help='Base directory of the project.')
         # import is here rather than top level because HTTPServer
         # is not importable on appengine
         from tornado.httpserver import HTTPServer
         server = HTTPServer(self, **settings)
-        server.listen(port, address='127.0.0.1')
+        server.listen(port, address=address)
         ioloop.IOLoop.instance().start()

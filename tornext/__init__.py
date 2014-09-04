@@ -34,33 +34,32 @@ from tornado.options import (define,
 ########################################
 # general settings #
 ####################
-define('debug', default=True, group='application', help='Application debug flag')
-define('compress_response', default=not options.debug, group='application')
-define('default_handler_class', group='application')
-define('default_handler_args',  group='application')
-define('ui_modules', group='application')
-define('ui_methods', group='application')
+define('debug', default=True, group='app', help='Application debug flag')
+define('compress_response', default=not options.debug, group='app')
+define('default_handler_class', group='app')
+define('default_handler_args',  group='app')
+#define('ui_modules', default={}, group='app')
+#define('ui_methods', group='app')
 # outside the application scope
-define('basedir',type=str, help='application base dir')
 define('port',   default=8000,  help="run on the given port")
 define('config', callback=lambda path: parse_config_file(path, final=False))
 #################
 # auth settings #
 #################
-define('cookie_secret', group='application')
-define('login_url',     default='/login', group='application')
-define('xsrf_cookies',  default=True,  group='application')
+define('cookie_secret', group='app')
+define('login_url',     default='/login', group='app')
+define('xsrf_cookies',  default=True,  group='app')
 ######################
 # templates settings #
 ######################
-define('autoescape', default='xhtml_escape', group='application')
-define('template_path', group='application')
+define('autoescape', default='xhtml_escape', group='app')
+define('template_path', group='app')
 #########################
 # static files settings #
 #########################
-define('static_path', type=str, group='application')
-define('static_url_prefix', default='/assets/', group='application')
-define('static_hash_cache', default=True, group='application')
+define('static_path', type=str, group='app')
+define('static_url_prefix', default='/assets/', group='app')
+define('static_hash_cache', default=True, group='app')
 
 
 ################################
