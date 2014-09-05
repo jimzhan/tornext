@@ -27,11 +27,13 @@ __all__ = ('generate_cookie_secret', 'secret',)
 
 def generate_cookie_secret():
     """Generate a random secret key for encrypting cookie.
+
     """
-    return ''.join([random.SystemRandom().choice("{}{}{}".format(
+    raw = ''.join([random.SystemRandom().choice("{}{}{}".format(
                     string.ascii_letters,
                     string.digits,
                     string.punctuation)) for i in range(50)])
+    return raw.replace("'", "@").replace('"', '#')
 
 
 def secret(root):

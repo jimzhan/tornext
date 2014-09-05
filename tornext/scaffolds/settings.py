@@ -9,7 +9,7 @@ debug = True
 ui_modules = modules
 
 # auth settings #
-cookie_secret = "${cookie_secret}"
+cookie_secret = '${cookie_secret}'
 
 # templates settings
 template_path = here('templates')

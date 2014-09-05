@@ -46,7 +46,7 @@ def execute(args):
         logger.error('%s already exists' % cwd)
     # copy the starter skeleton into current working directory.
     template = os.path.join(Scaffolds, 'starter')
-    patterns = shutil.ignore_patterns(*('*.css', '*.js', '*.pyc', 'node_modules'))
+    patterns = shutil.ignore_patterns(*('*.css', '*.pyc', 'node_modules'))
     shutil.copytree(template, cwd, symlinks=False, ignore=patterns)
     # create context for created project.
     source = os.path.join(Scaffolds, 'settings.py')
