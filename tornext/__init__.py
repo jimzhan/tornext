@@ -28,7 +28,7 @@ from tornado.options import (define,
                             options,
                             parse_config_file)
 
-
+__version__ = '0.9.0'
 ########################################
 # Default Tornado Application Settings #
 ########################################
@@ -59,7 +59,6 @@ define('template_path', group='app')
 #########################
 define('static_path', type=str, group='app')
 define('static_url_prefix', default='/assets/', group='app')
-define('static_hash_cache', default=True, group='app')
 
 
 ################################
@@ -67,12 +66,12 @@ define('static_hash_cache', default=True, group='app')
 ################################
 # Cache Settings #
 ##################
-define('cache', default=ObjectDict())
+define('cache', default={})
 #####################
 # Database Settings #
 #####################
-define('database', default=ObjectDict())
+define('database', default={})
 ###########################
 # Other Services Settings #
 ###########################
-define('service', default=ObjectDict())
+define('service', default={})

@@ -14,12 +14,12 @@
 # WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 # See the License for the specific language governing permissions and
 # limitations under the License.
-
+from __future__ import absolute_import
 """
 Regular expression helpers & constants.
 """
 import re
-
+from tornext import consts
 
 ######################################################################
 #  Regular Expression patterns
@@ -58,4 +58,18 @@ class url:
         return cls.patterns[0].match(value) \
                 or cls.patterns[1].search(value) \
                 or cls.patterns[2].search(value)
+
+
+#============================== common ==============================
+def is_regex(pattern):
+    """
+    Check if `pattern` compiled :mod:`re` pattern.
+
+    Args:
+        * pattern: object to check.
+
+    Returns:
+        :data:`True` if :data:`pattern` is a compiled :mod:`re` expression, :data:`False` otherwise.
+    """
+    return type(pattern) is consts.RegexType
 

@@ -15,21 +15,10 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-from __future__ import absolute_import
-"""
-
-"""
-from tornext.commands import AbstractCommand
+from tornado.web import url
+from apps.base import IndexHandler
 
 
-
-class Command(AbstractCommand):
-
-    @property
-    def message(self):
-        return 'initialize a new Tornado project.'
-
-
-    def execute(self, *args, **kwargs):
-        pass
-
+patterns = [
+    url(r'/',       IndexHandler),
+]

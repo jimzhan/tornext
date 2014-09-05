@@ -1,14 +1,15 @@
 #!/usr/bin/env python
 # -*- coding: utf-8 -*-
 from tornext.utils import here
+from apps import modules
 
 
 # general settings #
 debug = True
-#ui_modules = apps.uimodules
+ui_modules = modules
 
 # auth settings #
-cookie_secret = '${cookie_secret}'
+cookie_secret = "${cookie_secret}"
 
 # templates settings
 template_path = here('templates')

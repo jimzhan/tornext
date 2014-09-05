@@ -1,0 +1,8 @@
+<form id="login" action="{{ reverse_url('login') }}" method="post">
+  <fieldset>
+    {% module xsrf_form_html() %}
+    <input id="username" type="email" placeholder="{{ _('Username') }}">
+    <input id="password" type="password" placeholder="{{ _('Password') }}">
+    <button type="submit" class="pure-button">{{ _('Sign in') }}</button>
+  </fieldset>
+</form>

@@ -16,15 +16,8 @@
 # limitations under the License.
 from __future__ import absolute_import
 
-import logging
-
-from tornado import locale
-
 
 __all__ = ('STATUS',)
-
-
-logger = logging.getLogger(__name__)
 
 
 STATUS = {
@@ -83,4 +76,3 @@ STATUS = {
     507:    'Insufficient Storage',
     510:    'Not Extended'
 }
-
