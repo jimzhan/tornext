@@ -15,9 +15,7 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 from __future__ import absolute_import
-"""
 
-"""
 import logging
 
 from tornado import web
@@ -28,14 +26,14 @@ from tornado.options import options
 logger = logging.getLogger(__name__)
 
 
-
 class Application(web.Application):
     """Extension for `tornado.web.Application` with config support.
     """
-    def __init__(self, handlers, config='settings.py'):
+    def __init__(self, handlers, config='settings.py', **kwargs):
         # trigger parse_config_file
         options.config = config
         settings = options.group_dict('app')
+        settings.update(kwargs)
         super(Application, self).__init__(handlers,**settings)
 
 

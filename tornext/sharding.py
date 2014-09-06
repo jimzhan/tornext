@@ -27,7 +27,7 @@ from __future__ import absolute_import
 import zlib
 import bisect
 
-from tornext import consts
+from tornext import compat
 
 
 class Sharding(object):
@@ -51,8 +51,8 @@ class Sharding(object):
         """Adds a `node` to the hash ring (including a number of replicas).
         """
         self.nodes.add(node)
-        for x in consts.xrange(self.replicas):
-            crckey = zlib.crc32(consts.Byte("%s:%d" % (node, x)))
+        for x in compat.xrange(self.replicas):
+            crckey = zlib.crc32(compat.Byte("%s:%d" % (node, x)))
             self.ring[crckey] = node
             self.sorted_keys.append(crckey)
 
@@ -62,8 +62,8 @@ class Sharding(object):
         """Removes `node` from the hash ring and its replicas.
         """
         self.nodes.remove(node)
-        for x in consts.xrange(self.replicas):
-            crckey = zlib.crc32(consts.Byte("%s:%d" % (node, x)))
+        for x in compat.xrange(self.replicas):
+            crckey = zlib.crc32(compat.Byte("%s:%d" % (node, x)))
             self.ring.remove(crckey)
             self.sorted_keys.remove(crckey)
 
@@ -83,7 +83,7 @@ class Sharding(object):
         """
         if len(self.ring) == 0:
             return [None, None]
-        crc = zlib.crc32(consts.Byte(key))
+        crc = zlib.crc32(compat.Byte(key))
         idx = bisect.bisect(self.sorted_keys, crc)
         idx = min(idx, (self.replicas * len(self.nodes)) - 1)
         # prevents out of range index

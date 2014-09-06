@@ -41,6 +41,7 @@ Scaffolds = os.path.join(os.path.dirname(tornext.__file__), 'scaffolds')
 
 
 def execute(args):
+    config = 'settings.py'
     cwd = os.path.join(os.getcwd(), args['<project>'])
     if os.path.exists(cwd):
         logger.error('%s already exists' % cwd)
@@ -49,9 +50,9 @@ def execute(args):
     patterns = shutil.ignore_patterns(*('*.css', '*.pyc', 'node_modules'))
     shutil.copytree(template, cwd, symlinks=False, ignore=patterns)
     # create context for created project.
-    source = os.path.join(Scaffolds, 'settings.py')
+    source = os.path.join(Scaffolds, config)
     secret = crypto.generate_cookie_secret()
-    with open(os.path.join(cwd, 'settings.py'), 'w') as fileobj:
+    with open(os.path.join(cwd, config), 'w') as fileobj:
         fileobj.write(Template(source, cookie_secret=secret))
 
 

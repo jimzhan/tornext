@@ -13,8 +13,9 @@ var uglify  = require('gulp-uglify');
 var util    = require('gulp-util');
 var watch   = require('gulp-watch');
 
-var exec    = require('child_process').exec;
+var md5     = require('md5');
 var remove  = require('del');
+var exec    = require('child_process').exec;
 
 //############
 // Constants #
