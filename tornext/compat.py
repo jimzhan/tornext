@@ -28,6 +28,11 @@ import codecs
 IsPy3   = (sys.version_info.major == 3)
 
 #==========================================================================================
+#   Imports
+#==========================================================================================
+
+
+#==========================================================================================
 #   Types
 #==========================================================================================
 UnicodeType = IsPy3 and str or getattr(types, 'UnicodeType')
@@ -67,15 +72,15 @@ else:
     _meth_func = "im_func"
     _meth_self = "im_self"
 
-    _func_closure = "func_closure"
-    _func_code = "func_code"
-    _func_defaults = "func_defaults"
-    _func_globals = "func_globals"
+    _func_closure   = "func_closure"
+    _func_code      = "func_code"
+    _func_defaults  = "func_defaults"
+    _func_globals   = "func_globals"
 
-    _iterkeys = "iterkeys"
+    _iterkeys   = "iterkeys"
     _itervalues = "itervalues"
-    _iteritems = "iteritems"
-    _iterlists = "iterlists"
+    _iteritems  = "iteritems"
+    _iterlists  = "iterlists"
 
     xrange    = xrange
 

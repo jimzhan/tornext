@@ -19,7 +19,7 @@ from __future__ import absolute_import
 Regular expression helpers & constants.
 """
 import re
-from tornext import consts
+from tornext import compat
 
 ######################################################################
 #  Regular Expression patterns
@@ -71,5 +71,5 @@ def is_regex(pattern):
     Returns:
         :data:`True` if :data:`pattern` is a compiled :mod:`re` expression, :data:`False` otherwise.
     """
-    return type(pattern) is consts.RegexType
+    return type(pattern) is compat.RegexType
 

@@ -15,23 +15,28 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 """
+Usage: tornext test [options]
+
+Options:
+    -h, --help          show this help message and exit.
+
+See 'tornext help <command>' for more information on a specific command.
 """
 from __future__ import with_statement
 
-import random
-import string
+import os
+import tornext
+
+from docopt import docopt
+from subprocess import call
 
 
-__all__ = ('generate_cookie_secret',)
+runner = os.path.join(os.path.dirname(tornext.__file__), 'tests', 'runtests.py')
 
 
-def generate_cookie_secret():
-    """Generate a random secret key for encrypting cookie.
+def execute(args):
+    exit(call(['python', runner]))
 
-    Returns: 50 bits random string.
-    """
-    raw = ''.join([random.SystemRandom().choice("{}{}{}".format(
-                    string.ascii_letters,
-                    string.digits,
-                    string.punctuation)) for i in range(50)])
-    return raw.replace("'", "@").replace('"', '#')
+
+if __name__ == '__main__':
+    execute(docopt(__doc__))

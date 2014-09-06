@@ -15,23 +15,6 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 """
+Test suit for Tornext.
 """
-from __future__ import with_statement
-
-import random
-import string
-
-
-__all__ = ('generate_cookie_secret',)
-
-
-def generate_cookie_secret():
-    """Generate a random secret key for encrypting cookie.
-
-    Returns: 50 bits random string.
-    """
-    raw = ''.join([random.SystemRandom().choice("{}{}{}".format(
-                    string.ascii_letters,
-                    string.digits,
-                    string.punctuation)) for i in range(50)])
-    return raw.replace("'", "@").replace('"', '#')
+from __future__ import absolute_import

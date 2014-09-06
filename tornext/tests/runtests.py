@@ -14,24 +14,20 @@
 # WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 # See the License for the specific language governing permissions and
 # limitations under the License.
-"""
-"""
-from __future__ import with_statement
 
-import random
-import string
+from __future__ import absolute_import
 
-
-__all__ = ('generate_cookie_secret',)
+import os.path
+from tornado.test.util import unittest
 
 
-def generate_cookie_secret():
-    """Generate a random secret key for encrypting cookie.
+here = os.path.abspath(os.path.dirname(__file__))
 
-    Returns: 50 bits random string.
-    """
-    raw = ''.join([random.SystemRandom().choice("{}{}{}".format(
-                    string.ascii_letters,
-                    string.digits,
-                    string.punctuation)) for i in range(50)])
-    return raw.replace("'", "@").replace('"', '#')
+
+def main():
+    testsuite = unittest.TestLoader().discover(here, pattern='*_test.py')
+    unittest.TextTestRunner(verbosity=9).run(testsuite)
+
+
+if __name__ == '__main__':
+    main()
