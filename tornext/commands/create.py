@@ -33,11 +33,14 @@ import tornext
 from docopt import docopt
 
 from tornext import crypto
-from tornext.console import logger
+from tornext import console
 from tornext.utils import Template
 
 
 Scaffolds = os.path.join(os.path.dirname(tornext.__file__), 'scaffolds')
+
+
+logger = console.getLogger()
 
 
 def execute(args):
