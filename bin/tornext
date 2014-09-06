@@ -14,7 +14,6 @@
 # WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 # See the License for the specific language governing permissions and
 # limitations under the License.
-
 """
 Usage: tornext <command> [options] [<args>...]
 
@@ -26,21 +25,43 @@ Commands:
 
 See 'tornext <command> --help' for further information on a specific command.
 """
+import re
+import os.path
 import tornext
 
 from docopt import docopt
 from subprocess import call
+from tornext import commands
 
 
+class Manager(object):
 
-def dispatch(command, argv=None):
-    if command == 'create':
-        from tornext.commands import create
-        exit(call(['python', create.__file__] + argv))
+    basedir = os.path.dirname(commands.__file__)
+
+    @classmethod
+    def find_commands(cls):
+        """Find all available management commands.
+
+        Returns: list of commands under `tornext.commands`.
+        """
+        pattern = re.compile(r'^([a-zA-Z]+)(\w?)(\.py)')
+        return [py[:-3] for py in os.listdir(cls.basedir) if pattern.match(py)]
+
+
+    @classmethod
+    def dispatch(cls, command, argv=None):
+        """Dynamically dispatch the given command to concrete python script.
+
+        """
+        if command in cls.find_commands():
+            py = os.path.join(cls.basedir, '%s.py' % command)
+            exit(call(['python', py] + argv))
+        else:
+            exit(call(['python', __file__, '--help']))
 
 
 
 if __name__ == '__main__':
     args = docopt(__doc__, version=tornext.__version__, options_first=True)
     argv = [args['<command>']] + args['<args>']
-    dispatch(args['<command>'], argv)
+    Manager.dispatch(args['<command>'], argv=argv)
