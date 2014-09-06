@@ -18,16 +18,10 @@
 from __future__ import absolute_import
 
 import os.path
-from tornado.test.util import unittest
 
+from tornext import testing
 
-here = os.path.abspath(os.path.dirname(__file__))
-
-
-def main():
-    testsuite = unittest.TestLoader().discover(here, pattern='*_test.py')
-    unittest.TextTestRunner(verbosity=9).run(testsuite)
 
 
 if __name__ == '__main__':
-    main()
+    testing.execute(os.path.dirname(__file__))

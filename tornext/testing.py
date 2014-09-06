@@ -14,19 +14,28 @@
 # WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 # See the License for the specific language governing permissions and
 # limitations under the License.
+"""
+UnitTest helpers
+"""
+from __future__ import absolute_import
 
+from tornado.util import ObjectDict
 from tornado.test.util import unittest
 
-from tornext import compat
-from tornext import crypto
+
+__all__ = ('Verbosity', 'execute')
 
 
+Verbosity = ObjectDict(quite=0, default=1, verbose=2);
 
-class CryptoTest(unittest.TestCase):
 
-    def test_generate_cookie_secret(self):
-        for x in compat.xrange(100):
-            secret = crypto.generate_cookie_secret()
-            self.assertNotIn("'", secret)
-            self.assertNotIn('"', secret)
-            self.assertTrue(len(secret) == 50)
+def execute(path, pattern='*_test.py', verbosity=Verbosity.verbose):
+    """Execute test cases under the path with given pattern.
+
+    Args:
+        path: path to find test cases.
+        pattern: pattern to find test cases.
+        verbosity: level of output message (quite: 0, default: 1, verbose: 2).
+    """
+    testsuite = unittest.TestLoader().discover(path, pattern=pattern)
+    unittest.TextTestRunner(verbosity=verbosity).run(testsuite)

@@ -26,43 +26,8 @@ Commands:
 
 See 'tornext <command> --help' for further information on a specific command.
 """
-import re
-import os.path
-import tornext
-
-from docopt import docopt
-from subprocess import call
-from tornext import commands
-
-
-class Manager(object):
-
-    basedir = os.path.dirname(commands.__file__)
-
-    @classmethod
-    def find_commands(cls):
-        """Find all available management commands.
-
-        Returns: list of commands under `tornext.commands`.
-        """
-        pattern = re.compile(r'^([a-zA-Z]+)(\w?)(\.py)')
-        return [py[:-3] for py in os.listdir(cls.basedir) if pattern.match(py)]
-
-
-    @classmethod
-    def dispatch(cls, command, argv=None):
-        """Dynamically dispatch the given command to concrete python script.
-
-        """
-        if command in cls.find_commands():
-            py = os.path.join(cls.basedir, '%s.py' % command)
-            exit(call(['python', py] + argv))
-        else:
-            exit(call(['python', __file__, '--help']))
-
+from tornext.commands import Manager
 
 
 if __name__ == '__main__':
-    args = docopt(__doc__, version=tornext.__version__, options_first=True)
-    argv = [args['<command>']] + args['<args>']
-    Manager.dispatch(args['<command>'], argv=argv)
+    Manager(__doc__, options_first=True).dispatch()

@@ -31,11 +31,11 @@ from docopt import docopt
 from subprocess import call
 
 
-runner = os.path.join(os.path.dirname(tornext.__file__), 'tests', 'runtests.py')
+basedir = os.path.join(os.path.dirname(tornext.__file__), 'tests')
 
 
 def execute(args):
-    exit(call(['python', runner]))
+    exit(call(['python', os.path.join(basedir, 'runtests.py')]))
 
 
 if __name__ == '__main__':
