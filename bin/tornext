@@ -14,20 +14,8 @@
 # WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 # See the License for the specific language governing permissions and
 # limitations under the License.
-"""
-Usage: tornext <command> [options] [<args>...]
-
-Options:
-    -h, --help          show this help message and exit.
-
-Commands:
-    create              create a Tornado project with the given name.
-    test                run test suite for Tornext.
-
-See 'tornext <command> --help' for further information on a specific command.
-"""
 from tornext.commands import Manager
 
 
 if __name__ == '__main__':
-    Manager(__doc__, options_first=True).dispatch()
+    Manager(options_first=True).dispatch()

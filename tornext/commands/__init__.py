@@ -14,7 +14,18 @@
 # WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 # See the License for the specific language governing permissions and
 # limitations under the License.
+"""
+Usage: tornext <command> [options] [<args>...]
 
+Options:
+    -h, --help          show this help message and exit.
+
+Commands:
+    create              create a Tornado project with the given name.
+    test                run test suite for Tornext.
+
+See 'tornext <command> --help' for further information on a specific command.
+"""
 from __future__ import absolute_import
 
 import re
@@ -28,10 +39,17 @@ class Manager(object):
 
     basedir = os.path.dirname(__file__)
 
-    def __init__(self, docstring, **kwargs):
-        self.args = docopt(docstring, **kwargs)
-        self.argv = [self.args['<command>']] + self.args['<args>']
+    def __init__(self, docstring=__doc__, options_first=True, **kwargs):
+        self.args = docopt(docstring, options_first=options_first, **kwargs)
         self.cmd  = self.args['<command>']
+
+
+    @property
+    def argv(self):
+        argv = [self.args['<command>']]
+        if self.args.has_key('<args>'):
+            argv += self.args['<args>']
+        return argv
 
 
     @property

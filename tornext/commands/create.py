@@ -29,7 +29,7 @@ from __future__ import with_statement
 
 import os
 import shutil
-import tornext
+
 from docopt import docopt
 
 from tornext import crypto
@@ -37,25 +37,26 @@ from tornext import console
 from tornext.utils import Template
 
 
-Scaffolds = os.path.join(os.path.dirname(tornext.__file__), 'scaffolds')
+basedir = os.path.join(os.path.dirname(__file__), os.path.pardir, 'scaffolds')
 
 
 logger = console.getLogger()
 
 
 def execute(args):
-    config = 'settings.py'
-    cwd = os.path.join(os.getcwd(), args['<project>'])
+    config  = os.path.join('config', 'settings.py')
+    project = args['<project>']
+    cwd = os.path.join(os.getcwd(), project)
     if os.path.exists(cwd):
         logger.error('%s already exists' % cwd)
     # copy the starter skeleton into current working directory.
-    template = os.path.join(Scaffolds, 'starter')
     patterns = shutil.ignore_patterns(*('*.css', '*.pyc', 'node_modules'))
-    shutil.copytree(template, cwd, symlinks=False, ignore=patterns)
+    shutil.copytree(os.path.join(basedir, 'project'), cwd, symlinks=False, ignore=patterns)
+    shutil.move(os.path.join(cwd, 'project'), os.path.join(cwd, project))
     # create context for created project.
-    source = os.path.join(Scaffolds, config)
+    source = os.path.join(basedir, 'project', 'project', config)
     secret = crypto.generate_cookie_secret()
-    with open(os.path.join(cwd, config), 'w') as fileobj:
+    with open(os.path.join(cwd, project, config), 'w') as fileobj:
         fileobj.write(Template(source, cookie_secret=secret))
 
 
